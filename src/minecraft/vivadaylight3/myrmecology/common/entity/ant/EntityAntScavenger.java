@@ -32,4 +32,16 @@ public class EntityAntScavenger extends EntityAnt {
 
     }
 
+    @Override
+    protected int getDropItemId() {
+
+	if (this.inventory[0] == null) {
+
+	    return 0;
+
+	}
+
+	return this.inventory[0].getItem().itemID;
+    }
+
 }

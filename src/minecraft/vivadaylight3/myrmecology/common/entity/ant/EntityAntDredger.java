@@ -12,16 +12,20 @@ public class EntityAntDredger extends EntityAnt {
 
     public EntityAntDredger(World par1World) {
 	super(par1World);
-	this.tasks
-	.addTask(
-		1,
-		new AntBehaviourDredger(this, par1World, this
-			.getNavigator()));
+	this.tasks.addTask(1,
+		new AntBehaviourDredger(this, par1World, this.getNavigator()));
     }
-    
+
     @Override
     public ItemAnt getAnt() {
 	return Register.antDredger;
+    }
+
+    @Override
+    public boolean isAIEnabled() {
+
+	return false;
+
     }
 
     @Override

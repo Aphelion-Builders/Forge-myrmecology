@@ -1,6 +1,7 @@
 package vivadaylight3.myrmecology.common.tileentity;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 import net.minecraft.block.BlockChest;
@@ -15,7 +16,9 @@ import vivadaylight3.myrmecology.api.item.ItemAnt;
 import vivadaylight3.myrmecology.api.item.ItemBreedingChamber;
 import vivadaylight3.myrmecology.api.util.AntProperties;
 import vivadaylight3.myrmecology.api.util.Metadata;
+import vivadaylight3.myrmecology.common.Register;
 import vivadaylight3.myrmecology.common.inventory.ContainerAntFarm;
+import vivadaylight3.myrmecology.common.item.ItemUpgrade;
 import vivadaylight3.myrmecology.common.lib.Environment;
 import vivadaylight3.myrmecology.common.lib.Time;
 
@@ -109,90 +112,6 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 	return null;
 
     }
-
-    /**
-     * Checks whether or not the ant can eat the food in the food slots
-     * 
-     * @param ItemAnt
-     * @return boolean
-     */
-    /*
-     * private boolean antCanEat(ItemAnt ant) {
-     * 
-     * for (int k = getFoodSlots()[0]; k <= getFoodSlots()[1]; k++) {
-     * 
-     * if (ant.eatsSweet()) {
-     * 
-     * System.out.println("Ant eats sweet");
-     * 
-     * for (int i = 0; i < AntProperties.getFoodSweet().length; k++) {
-     * 
-     * System.out.println("Looped Food: "+AntProperties.getFoodSweet()[i]);
-     * System.out.println("Contents: "+getContents()[k]);
-     * 
-     * if ((AntProperties.getFoodSweet()[i] == this.getContents()[k]
-     * .getItem().itemID)) {
-     * 
-     * return true;
-     * 
-     * }
-     * 
-     * }
-     * 
-     * }
-     * 
-     * if (ant.eatsSavoury()) {
-     * 
-     * System.out.println("Ant eats savoury");
-     * 
-     * for (int i = 0; i < AntProperties.getFoodSavoury().length; k++) {
-     * 
-     * if ((AntProperties.getFoodSavoury()[i] == this
-     * .getContents()[k].getItem().itemID)) {
-     * 
-     * return true;
-     * 
-     * }
-     * 
-     * }
-     * 
-     * }
-     * 
-     * if (ant.eatsMeat()) {
-     * 
-     * System.out.println("Ant eats meat");
-     * 
-     * for (int i = 0; i < AntProperties.getFoodMeat().length; k++) {
-     * 
-     * if ((AntProperties.getFoodMeat()[i] == this.getContents()[k]
-     * .getItem().itemID)) {
-     * 
-     * return true;
-     * 
-     * }
-     * 
-     * }
-     * 
-     * }
-     * 
-     * if (ant.eatsLarvae()) {
-     * 
-     * System.out.println("Ant eats larvae");
-     * 
-     * if (this.getContents()[k].getItemDamage() == 3) {
-     * 
-     * return true;
-     * 
-     * }
-     * 
-     * }
-     * 
-     * }
-     * 
-     * return false;
-     * 
-     * }
-     */
 
     /**
      * Gets the breeding result from the ant farm's drone and queen
@@ -368,10 +287,22 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 
 	AntProperties.setProperties(result, false, 0);
 
-	// Environment.addItemStackToInventory(result, getContents(),
-	// stackLimit, this);
+	Environment.addItemStackToInventory(result, getContents(), stackLimit,
+		this);
 
-	this.getContents()[7] = result;
+	int num = new Random().nextInt(((ItemAnt) result.getItem())
+		.getFertility() * 3);
+	ItemStack stack = new ItemStack(Register.itemPheromoneBottle, num);
+
+	if (Environment.inventoryCanHold(stack, getContents(), stackLimit)
+		&& stack.stackSize > 0) {
+
+	    Environment.addItemStackToInventory(stack, getContents(),
+		    stackLimit, this);
+
+	}
+
+	stack = null;
 
 	this.decrStackSize(getQueenSlot(), 1);
 	this.onInventoryChanged();
@@ -400,8 +331,23 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 
     private int getLifetimeTotal() {
 
-	return ((ItemAnt) this.getQueen().getItem()).getLifetime();
+	int time = ((ItemAnt) this.getQueen().getItem()).getLifetime();
 
+	if (this.getStackInSlot(this.getUpgradeSlot()) != null
+		&& this.getStackInSlot(this.getUpgradeSlot()).getItem() instanceof ItemUpgrade
+		&& this.getStackInSlot(this.getUpgradeSlot()).getItemDamage() == 1) {
+
+	    return time / 2;
+
+	}
+
+	return time;
+
+    }
+
+    private int getUpgradeSlot() {
+	// TODO Auto-generated method stub
+	return 18;
     }
 
     public int getMaxStackSize() {
@@ -465,7 +411,7 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 
     @Override
     public String getInvName() {
-	return "Ant Farm";
+	return "Formicarium";
     }
 
     @Override
@@ -518,7 +464,7 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 
     @Override
     public int getInventoryStackLimit() {
-	return 64;
+	return 1;
     }
 
     @Override
@@ -529,7 +475,7 @@ public class TileEntityAntFarm extends TileEntity implements IInventory {
 			this.yCoord + 0.5D, this.zCoord + 0.5D) <= 64.0D;
     }
 
-    private static int getDroneSlot() {
+    public static int getDroneSlot() {
 	return 0;
     }
 

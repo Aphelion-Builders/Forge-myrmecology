@@ -33,7 +33,7 @@ import cpw.mods.fml.relauncher.SideOnly;
  */
 
 public class ItemAnt extends Item {
-    
+
     /**
      * Holds the ant's icons
      */
@@ -62,7 +62,7 @@ public class ItemAnt extends Item {
     private void prepareItem() {
 
 	setUnlocalizedName(this.getSpeciesSubName());
-	setCreativeTab(Register.tabMyrmecology);
+	setCreativeTab(Register.tabAnts);
 	setMaxStackSize(64);
 	// func_111206_d(Resources.TEXTURE_PREFIX + "ant_"
 	// + this.getSpeciesSubName());
@@ -114,7 +114,7 @@ public class ItemAnt extends Item {
 	    if (par3World.isRemote
 		    || par1ItemStack.getItemDamage() != Metadata
 			    .getMetaWorker()) {
-		return true;
+		return false;
 	    }
 
 	    par4 += Facing.offsetsXForSide[par7];
@@ -238,7 +238,6 @@ public class ItemAnt extends Item {
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
     public void getSubItems(int itemID, CreativeTabs tabs, List list) {
 
 	for (int k = 0; k < Metadata.typeMeta.length; k++) {

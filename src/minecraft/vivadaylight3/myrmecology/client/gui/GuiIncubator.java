@@ -19,7 +19,7 @@ import org.lwjgl.opengl.GL11;
 import vivadaylight3.myrmecology.api.util.Metadata;
 import vivadaylight3.myrmecology.common.Reference;
 import vivadaylight3.myrmecology.common.Register;
-import vivadaylight3.myrmecology.common.handler.MyrmecologyPacketHandler;
+import vivadaylight3.myrmecology.common.handler.PacketHandler;
 import vivadaylight3.myrmecology.common.inventory.ContainerIncubator;
 import vivadaylight3.myrmecology.common.lib.Resources;
 import vivadaylight3.myrmecology.common.tileentity.TileEntityIncubator;
@@ -52,7 +52,7 @@ public class GuiIncubator extends GuiContainer {
 	this.world = parWorld;
 	this.tile = tileEntity;
 	this.players.add(parPlayer);
-	
+
 	parPlayer.addStat(Register.achieveIncubateAnts, 1);
     }
 
@@ -132,6 +132,7 @@ public class GuiIncubator extends GuiContainer {
 
     }
 
+    @SideOnly(Side.CLIENT)
     private void sendResultAntMetaPacket(int meta) {
 
 	ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
@@ -153,7 +154,7 @@ public class GuiIncubator extends GuiContainer {
 	    EntityPlayerMP player2 = (EntityPlayerMP) this.player;
 	} else if (side == Side.CLIENT) {
 
-	    EntityClientPlayerMP player2 = (EntityClientPlayerMP) MyrmecologyPacketHandler
+	    EntityClientPlayerMP player2 = (EntityClientPlayerMP) PacketHandler
 		    .getSidedPlayer(this.player);
 
 	    player2.sendQueue.addToSendQueue(packet);

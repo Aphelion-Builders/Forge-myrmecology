@@ -14,6 +14,15 @@ public class Maths {
 
     }
 
+    public static double randDouble(int max, int places) {
+
+	Random rand = new Random();
+	int base = rand.nextInt(max);
+	double decimal = rand.nextInt(9) / Math.pow(10, places);
+	return base + decimal;
+
+    }
+
     public static int incrementTo(int numToChange, int increment, int to,
 	    int setTo) {
 

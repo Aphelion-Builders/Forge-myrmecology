@@ -40,11 +40,11 @@ public class ItemBreedingChamber extends Item {
 	return true;
 
     }
-    
-    public ItemStack getCraftingIngredient(){
-	
+
+    public ItemStack getCraftingIngredient() {
+
 	return null;
-	
+
     }
 
     public Icon getIconFromDamageForRenderPass(int par1, int par2) {
@@ -83,7 +83,7 @@ public class ItemBreedingChamber extends Item {
 
 	setUnlocalizedName(this.getChamberAntSpeciesName()
 		+ Reference.ITEM_CHAMBER_NAME);
-	setCreativeTab(Register.tabMyrmecology);
+	setCreativeTab(Register.tabAnts);
 	setMaxStackSize(64);
 	// func_111206_d(Resources.TEXTURE_PREFIX + "ant_"
 	// + this.getSpeciesSubName());

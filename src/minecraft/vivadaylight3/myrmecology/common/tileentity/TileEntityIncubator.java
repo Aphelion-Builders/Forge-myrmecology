@@ -17,10 +17,14 @@ import net.minecraft.tileentity.TileEntity;
 import vivadaylight3.myrmecology.api.item.ItemAnt;
 import vivadaylight3.myrmecology.api.util.AntProperties;
 import vivadaylight3.myrmecology.api.util.Metadata;
+import vivadaylight3.myrmecology.common.Log;
 import vivadaylight3.myrmecology.common.Reference;
 import vivadaylight3.myrmecology.common.Register;
+import vivadaylight3.myrmecology.common.block.BlockIncubator;
+import vivadaylight3.myrmecology.common.handler.PacketHandler;
 import vivadaylight3.myrmecology.common.inventory.ContainerIncubator;
 import vivadaylight3.myrmecology.common.lib.Environment;
+import vivadaylight3.myrmecology.common.item.ItemUpgrade;
 
 import com.google.common.io.ByteArrayDataInput;
 
@@ -36,10 +40,8 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
 
     private static final String RESULT_ANT_META_KEY = "ResultAntMeta";
 
-    // Will be changeable via a gui button, one for each ant type but larvae
     private int resultAntMeta = -1;
 
-    // Called in GuiIncubator.actionPerformed()
     public void setResultAntMeta(int meta) {
 
 	this.resultAntMeta = meta;
@@ -50,6 +52,21 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
     public int getResultAntMeta() {
 
 	return this.resultAntMeta;
+
+    }
+
+    @Override
+    public Packet getDescriptionPacket() {
+	return PacketHandler.getTileEntityPacket(this);
+    }
+
+    public void handlePacket(ItemStack[] stacks) {
+
+	for (int k = 0; k < stacks.length; k++) {
+
+	    this.contents[k] = stacks[k];
+
+	}
 
     }
 
@@ -82,13 +99,31 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
 
     }
 
+    public int getUpgradeSlot() {
+
+	return 17;
+
+    }
+
     private int getMaturingTime() {
 
 	if (this.getLarva() != null) {
 
 	    if (this.getLarva().getItem() instanceof ItemAnt) {
 
-		return ((ItemAnt) this.getLarva().getItem()).getMaturingTime();
+		int time = ((ItemAnt) this.getLarva().getItem())
+			.getMaturingTime();
+
+		if (this.getStackInSlot(this.getUpgradeSlot()) != null
+			&& this.getStackInSlot(this.getUpgradeSlot()).getItem() instanceof ItemUpgrade
+			&& this.getStackInSlot(this.getUpgradeSlot())
+				.getItemDamage() == 0) {
+
+		    return time / 2;
+
+		}
+
+		return time;
 
 	    }
 
@@ -143,16 +178,17 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
 
     // turns the larvae into a mature ant
     private void finishIncubation() {
+
 	ItemStack result = new ItemStack(this.getLarva().getItem(),
 		((ItemAnt) this.getLarva().getItem()).getFertility(),
 		this.getResultAntMeta());
 
 	Environment.addItemStackToInventory(result, getContents(),
 		getMaxStackSize(), this);
+
 	this.decrStackSize(ContainerIncubator.getLarvaSlot(), 1);
 	this.decrStackSize(ContainerIncubator.getFoodSlot(), 1);
 
-	this.onInventoryChanged();
 	this.setResultAntMeta(-1);
 
     }
@@ -223,7 +259,7 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
     }
 
     public String getInvName() {
-	return "Ant Incubator";
+	return "Solarium";
     }
 
     public boolean isInvNameLocalized() {
@@ -312,40 +348,39 @@ public class TileEntityIncubator extends TileEntity implements IInventory,
 
 	Item input = this.getContents()[ContainerIncubator.getFoodSlot()]
 		.getItem();
-	
-	for(int k = 0; k < Metadata.breedingItems.length; k++){
-	    
-	    if(input == Metadata.breedingItems[k]){
-		
+
+	for (int k = 0; k < Metadata.breedingItems.length; k++) {
+
+	    if (input == Metadata.breedingItems[k]) {
+
 		return k;
-		
+
 	    }
-	    
+
 	}
-	
+
 	return -1;
-	
+
 	/*
-
-	if (input == Item.stick.itemID) {
-
-	    return Metadata.getMetaDrone();
-
-	} else if (input == Register.blockFungi.blockID) {
-
-	    return Metadata.getMetaWorker();
-
-	} else if (input == Item.goldNugget.itemID) {
-
-	    return Metadata.getMetaQueen();
-
-	} else {
-
-	    return -1;
-
-	}
-	
-	*/
+	 * 
+	 * if (input == Item.stick.itemID) {
+	 * 
+	 * return Metadata.getMetaDrone();
+	 * 
+	 * } else if (input == Register.blockFungi.blockID) {
+	 * 
+	 * return Metadata.getMetaWorker();
+	 * 
+	 * } else if (input == Item.goldNugget.itemID) {
+	 * 
+	 * return Metadata.getMetaQueen();
+	 * 
+	 * } else {
+	 * 
+	 * return -1;
+	 * 
+	 * }
+	 */
 
     }
 

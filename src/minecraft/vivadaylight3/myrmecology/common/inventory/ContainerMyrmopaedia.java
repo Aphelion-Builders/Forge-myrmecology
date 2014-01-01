@@ -251,6 +251,12 @@ public class ContainerMyrmopaedia extends Container {
 	return true;
     }
 
+    public void update() {
+
+	this.inventory.update();
+
+    }
+
     public void writeToNBT() {
 	Nbt.setTag(containerStack);
 

@@ -3,13 +3,12 @@ package vivadaylight3.myrmecology.common.lib;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -17,106 +16,120 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import vivadaylight3.myrmecology.common.Log;
+import vivadaylight3.myrmecology.common.Register;
+import vivadaylight3.myrmecology.common.tileentity.TileEntityAntChest;
 
 public class Environment {
-    
-    public static Entity getNearestEntityFrom(List list, int x, int y, int z, int distance){
-	
+
+    public static Entity getNearestEntityFrom(List list, double x, double y,
+	    double z, int distance) {
+
+	return getNearestEntityFrom(list, (int) x, (int) y, (int) z, distance);
+
+    }
+
+    public static Entity getNearestEntityFrom(List list, int x, int y, int z,
+	    int distance) {
+
 	double d4 = -1.0D;
-        Entity entity = null;
-        
-        if(list.size() <= 0 || list == null){
-            
-            return null;
-            
-        }
+	Entity entity = null;
 
-        for (int i = 0; i < list.size(); ++i)
-        {
-            Entity entity1 = (Entity)list.get(i);
-            double d5 = entity1.getDistanceSq(x, y, z);
+	if (list.size() <= 0 || list == null) {
 
-            if ((distance < 0.0D || d5 < distance * distance) && (d4 == -1.0D || d5 < d4))
-            {
-                d4 = d5;
-                entity = entity1;
-            }
-        }
+	    return null;
 
-        return entity;
-	
-    }
-    
-    public static TileEntity getNearestTileEntityFrom(List list, double x, double y, double z){
-	
-	double d4 = -1.0D;
-        TileEntity entity = null;
-        
-        if(list.size() <= 0 || list == null){
-            
-            System.out.println("getNearest : list < 0 || list == null");
-            
-            return null;
-            
-        }
-        
-        TileEntity nearest = (TileEntity) list.get(0);
+	}
 
-        for (int i = 0; i < list.size(); ++i)
-        {
-            
-            if(((TileEntity) list.get(i)).getDistanceFrom(x, y, z) < nearest.getDistanceFrom(x, y, z)){
-        	
-        	nearest = (TileEntity) list.get(i);
-        	
-            }
-            
-        }
+	for (int i = 0; i < list.size(); ++i) {
+	    Entity entity1 = (Entity) list.get(i);
+	    double d5 = entity1.getDistanceSq(x, y, z);
 
-        return nearest;
-	
-    }
-    
-    public static int[] getNearestBlockFrom(List list, Entity entity, int distance){
-	
-	return null;
-	
-    }
-
-    public static Entity spawnEntity(World par0World, Entity entity,
-	    double par2, double par4, double par6) {
-
-	for (int j = 0; j < 1; ++j) {
-	    if (entity != null && entity instanceof EntityLivingBase) {
-		EntityLiving entityliving = (EntityLiving) entity;
-		entity.setLocationAndAngles(par2, par4, par6,
-			MathHelper.wrapAngleTo180_float(par0World.rand
-				.nextFloat() * 360.0F), 0.0F);
-		entityliving.rotationYawHead = entityliving.rotationYaw;
-		entityliving.renderYawOffset = entityliving.rotationYaw;
-		par0World.spawnEntityInWorld(entity);
-		entityliving.playLivingSound();
+	    if ((distance < 0.0D || d5 < distance * distance)
+		    && (d4 == -1.0D || d5 < d4)) {
+		d4 = d5;
+		entity = entity1;
 	    }
 	}
 
 	return entity;
 
     }
-    
-    public static boolean coordinateIsCloseTo(double x, double y, double z, int x2,
-	    int y2, int z2, int distance){
-	
-	return coordinateIsCloseTo((int)x, (int)y, (int)z, x2,
-		    y2, z2, distance);
-	
+
+    public static TileEntity getNearestTileEntityFrom(
+	    ArrayList<TileEntity> list, Entity entity, double x, double y,
+	    double z) {
+
+	TileEntity nearest = null;
+
+	if (list == null || list.size() < 1) {
+
+	    return null;
+
+	}
+
+	nearest = list.get(0);
+
+	for (TileEntity tile : list) {
+
+	    if (entity.getDistance(tile.xCoord, tile.yCoord, tile.zCoord) < entity
+		    .getDistance(nearest.xCoord, nearest.yCoord, nearest.zCoord)) {
+
+		nearest = tile;
+
+	    }
+
+	}
+
+	return nearest;
+
     }
 
-    public static boolean coordinateIsCloseTo(int x, int y, int z, int x2,
-	    int y2, int z2, int distance) {
+    public static TileEntity getNearestAntChestFrom(ArrayList<TileEntity> list,
+	    Entity entity, double x, double y, double z) {
 
-	for (int k = -distance; k <= distance; k++) {
+	TileEntity nearest = null;
 
-	    if (x + k == x2 || y + k == y2 || z + k == z2) {
+	if (list == null || list.size() < 1) {
+
+	    return null;
+
+	}
+
+	if (list.get(0) instanceof TileEntityAntChest) {
+
+	    nearest = list.get(0);
+
+	}
+
+	for (TileEntity tile : list) {
+
+	    if (nearest != null) {
+
+		if (entity.getDistance(tile.xCoord, tile.yCoord, tile.zCoord) < entity
+			.getDistance(nearest.xCoord, nearest.yCoord,
+				nearest.zCoord)
+			&& tile instanceof TileEntityAntChest) {
+
+		    nearest = tile;
+
+		}
+
+	    }
+
+	}
+
+	return nearest;
+
+    }
+
+    public static boolean hasPheromoneBlockInRadius(
+	    ArrayList<BlockPosEntry> list, Entity entity, int distance) {
+
+	for (BlockPosEntry entry : list) {
+
+	    if (entity.getDistance(entry.xCoord, entry.yCoord, entry.zCoord) <= distance
+		    && entry.ID == Register.blockPheromone.blockID) {
 
 		return true;
 
@@ -128,38 +141,166 @@ public class Environment {
 
     }
 
-    public static List getEntityItemsInRadius(World world,
-	    double x, double y, double z, int radius) {
+    public static BlockPosEntry getNearestTreeEntryFrom(
+	    ArrayList<BlockPosEntry> list, Entity entity, double x, double y,
+	    double z) {
 
-	List list = world.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getAABBPool().getAABB(x-radius, y-radius, z-radius, x + radius, y + radius, z + radius));
+	BlockPosEntry nearest = null;
+
+	if (list == null || list.size() < 1) {
+
+	    return null;
+
+	} else {
+
+	}
+
+	nearest = list.get(0);
+
+	for (BlockPosEntry tile : list) {
+
+	    if (entity.getDistance(tile.xCoord, tile.yCoord, tile.zCoord) < entity
+		    .getDistance(nearest.xCoord, nearest.yCoord, nearest.zCoord)
+		    && TreeDictionary.contains(tile.toBlockIDEntry())) {
+
+		nearest = tile;
+
+	    }
+
+	}
+
+	return nearest;
+
+    }
+
+    public static BlockPosEntry getNearestBlockFrom(
+	    ArrayList<BlockPosEntry> list, Entity entity, double x, double y,
+	    double z) {
+
+	BlockPosEntry nearest = null;
+
+	if (list == null || list.size() < 1) {
+
+	    return null;
+
+	} else {
+
+	}
+
+	nearest = list.get(0);
+
+	for (BlockPosEntry tile : list) {
+
+	    if (entity.getDistance(tile.xCoord, tile.yCoord, tile.zCoord) < entity
+		    .getDistance(nearest.xCoord, nearest.yCoord, nearest.zCoord)) {
+
+		nearest = tile;
+
+	    }
+
+	}
+
+	return nearest;
+
+    }
+
+    public static Entity spawnEntity(World par0World, Entity entity,
+	    double par2, double par4, double par6) {
+
+	if (entity != null && entity instanceof EntityLivingBase) {
+	    EntityLiving entityliving = (EntityLiving) entity;
+	    entity.setLocationAndAngles(par2, par4, par6, MathHelper
+		    .wrapAngleTo180_float(par0World.rand.nextFloat() * 360.0F),
+		    0.0F);
+	    entityliving.rotationYawHead = entityliving.rotationYaw;
+	    entityliving.renderYawOffset = entityliving.rotationYaw;
+	    entity.setPosition(par2, par4, par6);
+	    par0World.spawnEntityInWorld(entity);
+	    entityliving.playLivingSound();
+	}
+
+	return entity;
+
+    }
+
+    public static boolean coordinateIsCloseTo(double x, double y, double z,
+	    int x2, int y2, int z2, int distance) {
+
+	return coordinateIsCloseTo((int) x, (int) y, (int) z, x2, y2, z2,
+		distance);
+
+    }
+
+    public static boolean coordinateIsCloseTo(int x, int y, int z, int x2,
+	    int y2, int z2, int distance) {
+
+	if (Math.max(x, x2) - Math.min(x2, x) <= distance
+		&& Math.max(y, y2) - Math.min(y2, y) <= distance
+		&& Math.max(z, z2) - Math.min(z2, z) <= distance) {
+
+	    return true;
+
+	}
+
+	return false;
+
+    }
+
+    public static List getEntityItemsInRadius(World world, double x, double y,
+	    double z, int radius) {
+
+	List list = world.getEntitiesWithinAABB(
+		EntityItem.class,
+		AxisAlignedBB.getAABBPool().getAABB(x - radius, y - radius,
+			z - radius, x + radius, y + radius, z + radius));
 
 	return list;
 
     }
-    
-    public static List getTileEntitiesInRadius(World world,
+
+    public static ArrayList<TileEntity> getTileEntitiesInRadius(World world,
 	    double x, double y, double z, int radius) {
 
-	List list = world.getEntitiesWithinAABB(TileEntity.class, AxisAlignedBB.getAABBPool().getAABB(x-radius, y-radius, z-radius, x + radius, y + radius, z + radius));
-
-	if(list == null){
-	    
-	    System.out.println("getTileEntities : list == null");
-	    
-	}
-	
-	if(list.size() < 0){
-	    
-	    System.out.println("getTileEntities : list < 0");
-	    
-	}
-	
-	return list;
+	return getTileEntitiesInRadius(world, (int) x, (int) y, (int) z, radius);
 
     }
 
-    public static ArrayList<EntityPlayer> getEntitiesInRadius(World world,
-	    double x, double y, double z, int radius) {
+    public static ArrayList<TileEntity> getTileEntitiesInRadius(World world,
+	    int x, int y, int z, int radius) {
+
+	ArrayList<TileEntity> result = new ArrayList<TileEntity>();
+
+	for (int newX = -1 * radius; newX <= radius; newX++) {
+
+	    for (int newY = -1 * radius; newY <= radius; newY++) {
+
+		for (int newZ = -1 * radius; newZ <= radius; newZ++) {
+
+		    if (newX * newX + newY * newY + newZ * newZ <= radius
+			    * radius) {
+
+			if (world.getBlockTileEntity(newX + x, newY + y, newZ
+				+ z) != null) {
+
+			    result.add(world.getBlockTileEntity(newX + x, newY
+				    + y, newZ + z));
+
+			}
+
+		    }
+
+		}
+
+	    }
+
+	}
+
+	return result;
+
+    }
+
+    public static ArrayList<Entity> getEntitiesInRadius(World world, double x,
+	    double y, double z, int radius) {
 
 	AxisAlignedBB axisalignedbb = AxisAlignedBB
 		.getAABBPool()
@@ -169,26 +310,64 @@ public class Environment {
 	List list = world.getEntitiesWithinAABB(EntityPlayer.class,
 		axisalignedbb);
 
-	ArrayList<EntityPlayer> result = new ArrayList<EntityPlayer>();
+	ArrayList<Entity> result = new ArrayList<Entity>();
 
 	for (int k = 0; k < list.size(); k++) {
 
-	    result.add((EntityPlayer) list.get(k));
+	    result.add((Entity) list.get(k));
 
 	}
 	return result;
     }
 
-    public static boolean blockIsPowered(World world, int x, int y, int z) {
+    public static ArrayList<Entity> getAnimalsInRadius(World world,
+	    Entity excluding, double x, double y, double z, int radius) {
 
-	if (world.getBlockPowerInput(x, y, z) > 0) {
+	AxisAlignedBB axisalignedbb = AxisAlignedBB
+		.getAABBPool()
+		.getAABB(x, y, z, (double) (x + 1), (double) (y + 1),
+			(double) (z + 1)).expand(radius, radius, radius);
+	axisalignedbb.maxY = (double) world.getHeight();
+	List list = world.getEntitiesWithinAABB(Entity.class, axisalignedbb);
 
-	    return true;
+	ArrayList<Entity> result = new ArrayList<Entity>();
+
+	for (int k = 0; k < list.size(); k++) {
+
+	    if (list.get(k) != excluding) {
+
+		result.add((Entity) list.get(k));
+
+	    }
 
 	}
 
-	return false;
+	return result;
+    }
 
+    public static ArrayList<EntityAnimal> getAnimalsInRadius(World world,
+	    Entity excluding, Class<? extends Entity> class1, double x,
+	    double y, double z, int radius) {
+
+	AxisAlignedBB axisalignedbb = AxisAlignedBB
+		.getAABBPool()
+		.getAABB(x, y, z, (double) (x + 1), (double) (y + 1),
+			(double) (z + 1)).expand(radius, radius, radius);
+	axisalignedbb.maxY = (double) world.getHeight();
+	List list = world.getEntitiesWithinAABB(class1, axisalignedbb);
+
+	ArrayList<EntityAnimal> result = new ArrayList<EntityAnimal>();
+
+	for (int k = 0; k < list.size(); k++) {
+
+	    if (list.get(k) != excluding) {
+
+		result.add((EntityAnimal) list.get(k));
+
+	    }
+
+	}
+	return result;
     }
 
     public static boolean blockIsPowered(IBlockAccess world, int x, int y, int z) {
@@ -297,11 +476,10 @@ public class Environment {
 
     }
 
-    // TODO
-    public static ArrayList<BlockEntry> getBlocksInRadius(World world, int x,
-	    int y, int z, int radius, int blockID) {
+    public static ArrayList<BlockPosEntry> getBlockIDsInRadius(World world,
+	    int x, int y, int z, int radius) {
 
-	ArrayList<BlockEntry> result = new ArrayList<BlockEntry>();
+	ArrayList<BlockPosEntry> result = new ArrayList<BlockPosEntry>();
 
 	for (int newX = -1 * radius; newX <= radius; newX++) {
 
@@ -312,10 +490,50 @@ public class Environment {
 		    if (newX * newX + newY * newY + newZ * newZ <= radius
 			    * radius) {
 
-			if (world.getBlockId(newX + x, newY + y, newZ + z) == blockID) {
+			result.add(new BlockPosEntry(newX + x, newY + y, newZ
+				+ z, world.getBlockId(x, y, z), world
+				.getBlockMetadata(newX + x, newY + y, newZ + z)));
 
-			    result.add(new BlockEntry(newX + x, newY + y, newZ
-				    + z, blockID));
+		    }
+
+		}
+
+	    }
+
+	}
+
+	return result;
+
+    }
+
+    public static ArrayList<BlockPosEntry> getBlocksInRadius(World world,
+	    double x, double y, double z, int radius) {
+
+	return getBlocksInRadius(world, (int) x, (int) y, (int) z, radius);
+
+    }
+
+    public static ArrayList<BlockPosEntry> getBlocksInRadius(World world,
+	    int x, int y, int z, int radius) {
+
+	ArrayList<BlockPosEntry> result = new ArrayList<BlockPosEntry>();
+
+	for (int newX = -1 * radius; newX <= radius; newX++) {
+
+	    for (int newY = -1 * radius; newY <= radius; newY++) {
+
+		for (int newZ = -1 * radius; newZ <= radius; newZ++) {
+
+		    if (newX * newX + newY * newY + newZ * newZ <= radius
+			    * radius) {
+
+			if (world.getBlockId(newX + x, newY + y, newZ + z) > 0) {
+
+			    result.add(new BlockPosEntry(newX + x, newY + y,
+				    newZ + z, world.getBlockId(newX + x, newY
+					    + y, newZ + z), world
+					    .getBlockMetadata(newX + x, newY
+						    + y, newZ + z)));
 
 			}
 
@@ -360,19 +578,20 @@ public class Environment {
 
     }
 
+    public static void spawnItem(ItemStack item, World world, double x,
+	    double y, double z) {
+
+	spawnItem(item, world, (int) x, (int) y, (int) z);
+
+    }
+
     public static void spawnItem(ItemStack item, World world, int x, int y,
 	    int z) {
 
-	if (!world.isRemote
-		&& world.getGameRules().getGameRuleBooleanValue("doTileDrops")) {
-	    float f = 0.7F;
-	    double d0 = world.rand.nextFloat() * f + (1.0F - f) * 0.5D;
-	    double d1 = world.rand.nextFloat() * f + (1.0F - f) * 0.5D;
-	    double d2 = world.rand.nextFloat() * f + (1.0F - f) * 0.5D;
-	    EntityItem entityitem = new EntityItem(world, x + d0, y + d1, z
-		    + d2, item);
-	    entityitem.delayBeforeCanPickup = 10;
+	if (item != null) {
+	    EntityItem entityitem = new EntityItem(world, x, y, z, item);
 	    world.spawnEntityInWorld(entityitem);
+
 	}
 
     }
@@ -416,6 +635,102 @@ public class Environment {
 
     }
 
+    public static int getBlockSide(String side, int metadata, int basemeta) {
+
+	if (side.equals("top")) {
+
+	    return 1;
+
+	} else if (side.equals("bottom")) {
+
+	    return 0;
+
+	} else if (side.equals("front")) {
+
+	    if (metadata == basemeta) {
+
+		return 2;
+
+	    } else if (metadata == basemeta + 1) {
+
+		return 5;
+
+	    } else if (metadata == basemeta + 2) {
+
+		return 3;
+
+	    } else if (metadata == basemeta + 3) {
+
+		return 4;
+
+	    }
+
+	} else if (side.equals("input")) {
+
+	    if (metadata == basemeta) {
+
+		return 4;
+
+	    } else if (metadata == basemeta + 1) {
+
+		return 2;
+
+	    } else if (metadata == basemeta + 2) {
+
+		return 5;
+
+	    } else if (metadata == basemeta + 3) {
+
+		return 3;
+
+	    }
+
+	} else if (side.equals("output")) {
+
+	    if (metadata == basemeta) {
+
+		return 5;
+
+	    } else if (metadata == basemeta + 1) {
+
+		return 3;
+
+	    } else if (metadata == basemeta + 2) {
+
+		return 4;
+
+	    } else if (metadata == basemeta + 3) {
+
+		return 2;
+
+	    }
+
+	} else if (side.equals("back")) {
+
+	    if (metadata == basemeta) {
+
+		return 4;
+
+	    } else if (metadata == basemeta + 1) {
+
+		return 3;
+
+	    } else if (metadata == basemeta + 2) {
+
+		return 5;
+
+	    } else if (metadata == basemeta + 3) {
+
+		return 2;
+
+	    }
+
+	}
+
+	return -1;
+
+    }
+
     /**
      * Returns the side name of the block depending on its metadata and side
      * 
@@ -426,7 +741,8 @@ public class Environment {
      * @return String 'top', 'bottom', 'front', 'input', 'output' or 'back'
      */
 
-    public static String getBlockSide(int side, int metadata, int basemeta) {
+    public static EnumBlockSide getBlockSide(int side, int metadata,
+	    int basemeta) {
 
 	int meta1 = basemeta;
 	int meta2 = basemeta + 1;
@@ -435,37 +751,37 @@ public class Environment {
 
 	if (side == 1) {
 
-	    return "top";
+	    return EnumBlockSide.TOP;
 
 	}
 	if (side == 0) {
 
-	    return "bottom";
+	    return EnumBlockSide.BOTTOM;
 
 	} else if ((metadata == meta1 && side == 2)
 		|| (metadata == meta2 && side == 5)
 		|| (metadata == meta3 && side == 3)
 		|| (metadata == meta4 && side == 4)) {
 
-	    return "front";
+	    return EnumBlockSide.FRONT;
 
 	} else if ((metadata == meta1 && side == 4)
 		|| (metadata == meta2 && side == 2)
 		|| (metadata == meta3 && side == 5)
 		|| (metadata == meta4 && side == 3)) {
 
-	    return "input";
+	    return EnumBlockSide.LEFT;
 
 	} else if ((metadata == meta1 && side == 5)
 		|| (metadata == meta2 && side == 3)
 		|| (metadata == meta3 && side == 4)
 		|| (metadata == meta4 && side == 2)) {
 
-	    return "output";
+	    return EnumBlockSide.RIGHT;
 
 	} else {
 
-	    return "back";
+	    return EnumBlockSide.BACK;
 
 	}
 
@@ -543,25 +859,76 @@ public class Environment {
     public static boolean inventoryCanHold(ItemStack item,
 	    ItemStack[] inventory, int max) {
 
-	int itemAmount = item.stackSize;
+	if (item == null) {
 
-	for (int k = 0; k < inventory.length; k++) {
+	    return false;
 
-	    if (inventory[k] == null) {
+	}
 
-		itemAmount -= max;
+	int left = item.stackSize;
+
+	for (int k = 0; k < item.stackSize; k++) {
+
+	    Log.debug("");
+	    Log.debug("NEW STACK SIZE CHECK");
+
+	    if (left < 1) {
+
+		return true;
 
 	    }
 
-	    if (inventory[k] == item) {
+	    for (int i = 0; i < inventory.length; i++) {
 
-		int slotSpace = max - inventory[k].stackSize;
+		Log.debug("NEW SLOT CHECK");
+		Log.debug("left == " + left);
 
-		itemAmount -= slotSpace;
+		if (left < 1) {
+
+		    return true;
+
+		}
+
+		if (inventory[i] == null) {
+
+		    Log.debug("inv[" + i + "] == null");
+
+		    if (left <= max) {
+
+			Log.debug("left <= max");
+			left -= max;
+
+		    }
+
+		} else {
+
+		    if (inventory[i].getItem() == item.getItem()
+			    && inventory[i].getItemDamage() == item
+				    .getItemDamage()) {
+
+			Log.debug("inv[" + i + "] == item");
+
+			if (inventory[i].stackSize + left <= max) {
+
+			    Log.debug("inv[" + i + "].stackSize + " + left
+				    + " <= " + max);
+			    left -= max;
+
+			} else {
+
+			    Log.debug("inv[" + i + "].stackSize + " + left
+				    + " > " + max);
+			    left -= (max - inventory[i].stackSize);
+
+			}
+
+		    }
+
+		}
 
 	    }
 
-	    if (itemAmount <= 0) {
+	    if (left < 1) {
 
 		return true;
 
@@ -606,53 +973,63 @@ public class Environment {
 
 	}
 
-	return 0;
+	return -1;
 
     }
 
-    public static void addItemStackToInventory(ItemStack item,
-	    ItemStack[] inventory, int max, TileEntity tileEntity) {
+    public static boolean inventoryHas(ItemStack item, ItemStack[] inventory) {
+
+	for (int k = 0; k < inventory.length; k++) {
+
+	    if (inventory[k] != null) {
+
+		if (inventory[k].getItem() == item.getItem()) {
+
+		    if (inventory[k].stackSize >= item.stackSize) {
+
+			return true;
+
+		    }
+
+		}
+
+	    }
+
+	}
+
+	return false;
+
+    }
+
+    public static void removeItemStackFromIventory(ItemStack item,
+	    ItemStack[] inventory, TileEntity tileEntity) {
 
 	int amount = item.stackSize;
 
 	for (int k = 0; k < inventory.length; k++) {
 
-	    if (amount > 0) {
+	    while (amount > 0) {
 
-		if (inventory[k] == null) {
+		if (inventory[k].getItem() == item.getItem()
+			&& inventory[k].getItemDamage() == item.getItemDamage()) {
 
-		    if (amount > max) {
+		    if (amount > inventory[k].stackSize) {
 
-			amount -= max;
+			amount -= inventory[k].stackSize;
 
-			inventory[k] = new ItemStack(item.getItem(), max,
-				item.getItemDamage());
+			inventory[k] = null;
 
 			if (tileEntity != null) {
 			    tileEntity.onInventoryChanged();
 			}
 
-		    } else if (amount < max) {
+		    } else if (amount <= inventory[k].stackSize) {
 
-			inventory[k] = new ItemStack(item.getItem(), amount,
+			inventory[k] = new ItemStack(item.getItem(),
+				inventory[k].stackSize - amount,
 				item.getItemDamage());
 
 			amount = 0;
-
-			if (tileEntity != null) {
-			    tileEntity.onInventoryChanged();
-			}
-
-		    }
-
-		} else if (inventory[k] == item) {
-
-		    if (inventory[k].stackSize + item.stackSize <= max) {
-
-			inventory[k] = new ItemStack(item.getItem(), max,
-				item.getItemDamage());
-
-			amount = max - inventory[k].stackSize;
 
 			if (tileEntity != null) {
 			    tileEntity.onInventoryChanged();
@@ -665,6 +1042,86 @@ public class Environment {
 	    }
 
 	}
+
+    }
+
+    public static void addItemStackToInventory(ItemStack item,
+	    ItemStack[] inventory, int max, TileEntity tileEntity) {
+
+	addItemStackToInventory(item, inventory, max, tileEntity, 0);
+
+    }
+
+    public static void addItemStackToInventory(ItemStack item,
+	    ItemStack[] inventory, int max, TileEntity tileEntity, int startSlot) {
+
+	int left = item.stackSize;
+
+	for (int k = 0; k < item.stackSize; k++) {
+
+	    if (left < 1) {
+
+		return;
+
+	    }
+
+	    for (int i = startSlot; i < inventory.length; i++) {
+
+		if (left < 1) {
+
+		    return;
+
+		}
+
+		if (inventory[i] == null) {
+
+		    if (left <= max) {
+
+			ItemStack stack = item.copy();
+			stack.stackSize = left;
+			inventory[i] = stack;
+			left -= max;
+
+		    } else {
+
+			ItemStack stack = item.copy();
+			stack.stackSize = max;
+			inventory[i] = stack;
+			left -= max;
+
+		    }
+
+		} else {
+
+		    if (inventory[i].getItem() == item.getItem()
+			    && inventory[i].getItemDamage() == item
+				    .getItemDamage()) {
+
+			if (inventory[i].stackSize < max) {
+
+			    if (inventory[i].stackSize + left <= max) {
+
+				inventory[i].stackSize += left;
+				left -= max;
+
+			    } else {
+
+				left -= (max - inventory[i].stackSize);
+				inventory[i].stackSize = max;
+
+			    }
+
+			}
+
+		    }
+
+		}
+
+	    }
+
+	}
+
+	return;
 
     }
 

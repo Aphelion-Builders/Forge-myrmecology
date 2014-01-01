@@ -42,6 +42,12 @@ public class AntProperties {
 
     }
 
+    /**
+     * Returns the completed lifetime in ticks
+     * 
+     * @param itemStack
+     * @return int
+     */
     public static int getLifetimeComplete(ItemStack itemStack) {
 
 	Nbt.setTag(itemStack);
@@ -50,6 +56,12 @@ public class AntProperties {
 
     }
 
+    /**
+     * Sets the completed lifetime int ticks
+     * 
+     * @param item
+     * @param value
+     */
     public static void setLifetimeComplete(ItemStack item, int value) {
 
 	Nbt.setTag(item);
@@ -58,6 +70,12 @@ public class AntProperties {
 
     }
 
+    /**
+     * Sets whether or not the ant has been mated
+     * 
+     * @param item
+     * @param value
+     */
     public static void setMated(ItemStack item, boolean value) {
 
 	Nbt.setTag(item);
@@ -66,6 +84,12 @@ public class AntProperties {
 
     }
 
+    /**
+     * Gets whether or not the ant has mated
+     * 
+     * @param itemStack
+     * @return boolean
+     */
     public static boolean getMated(ItemStack itemStack) {
 
 	Nbt.setTag(itemStack);
@@ -74,6 +98,12 @@ public class AntProperties {
 
     }
 
+    /**
+     * Sets the total maturing time
+     * 
+     * @param itemStack
+     * @param value
+     */
     public static void setMaturingTime(ItemStack itemStack, int value) {
 
 	Nbt.setTag(itemStack);
@@ -82,7 +112,12 @@ public class AntProperties {
 
     }
 
-    // TODO
+    /**
+     * Gets the completed maturing time in ticks
+     * 
+     * @param itemStack
+     * @return int
+     */
     public static int getMaturingTimeComplete(ItemStack itemStack) {
 
 	Nbt.setTag(itemStack);

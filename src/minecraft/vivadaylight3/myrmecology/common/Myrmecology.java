@@ -3,9 +3,11 @@ package vivadaylight3.myrmecology.common;
 import java.util.Arrays;
 
 import net.minecraftforge.common.Configuration;
-import vivadaylight3.myrmecology.common.handler.MyrmecologyGuiHandler;
-import vivadaylight3.myrmecology.common.handler.MyrmecologyPacketHandler;
+import vivadaylight3.myrmecology.client.ClientProxy;
+import vivadaylight3.myrmecology.common.handler.GuiHandler;
+import vivadaylight3.myrmecology.common.handler.PacketHandler;
 import vivadaylight3.myrmecology.common.lib.Resources;
+import vivadaylight3.myrmecology.common.lib.TreeDictionary;
 import vivadaylight3.myrmecology.common.lib.Url;
 import vivadaylight3.myrmecology.common.tileentity.TileEntityIncubator;
 import cpw.mods.fml.common.Mod;
@@ -27,7 +29,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
  */
 
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_ID, version = Reference.MOD_VERSION, dependencies = Reference.MOD_DEPENDENCIES)
-@NetworkMod(channels = { Reference.MOD_CHANNEL, Reference.MOD_CHANNEL_INCUBATOR }, clientSideRequired = true, serverSideRequired = false, packetHandler = MyrmecologyPacketHandler.class)
+@NetworkMod(channels = { Reference.MOD_CHANNEL, Reference.MOD_CHANNEL_INCUBATOR }, clientSideRequired = true, serverSideRequired = false, packetHandler = PacketHandler.class)
 public class Myrmecology {
 
     @SidedProxy(clientSide = "vivadaylight3.myrmecology.client.ClientProxy", serverSide = "vivadaylight3.myrmecology.common.CommonProxy")
@@ -44,35 +46,44 @@ public class Myrmecology {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
+	Log.info("Initialising config");
 	Configuration config = new Configuration(
 		event.getSuggestedConfigurationFile());
 
 	Register.setConfig(config);
-	
-	Register.checkAntBook();
 
+	Register.getConfigSettings();
+
+	Log.info("Getting version check URL");
 	Url url = new Url(Reference.VERSION_CHECK_URL);
 
 	// updateIsAvailable = Register.checkForUpdates(url);
 
+	Log.info("Registering creative tab");
 	Register.registerCreativeTab();
 
+	Log.info("Registering blocks");
 	Register.registerBlocks();
 
+	Log.info("Registering items");
 	Register.registerItems();
 
+	Log.info("Registering ant breeding recipes");
 	Register.registerBreeding();
 
+	Log.info("Registering crafting recipes");
 	Register.registerRecipes();
 
+	Log.info("Registering tile entities");
 	Register.registerTileEntities();
 
+	Log.info("Registering world gen");
 	Register.registerWorldGen();
 
-	MyrmecologyGuiHandler guiHandler = new MyrmecologyGuiHandler();
+	GuiHandler guiHandler = new GuiHandler();
 	NetworkRegistry.instance().registerGuiHandler(this, guiHandler);
 
-	MyrmecologyPacketHandler packetHandler = new MyrmecologyPacketHandler();
+	PacketHandler packetHandler = new PacketHandler();
 	NetworkRegistry.instance().registerChannel(packetHandler,
 		Reference.MOD_CHANNEL);
 
@@ -80,18 +91,27 @@ public class Myrmecology {
 	NetworkRegistry.instance().registerChannel(packetHandler2,
 		Reference.MOD_CHANNEL_INCUBATOR);
 
+	Log.info("Registering entities");
 	Register.registerEntities();
-	
-	Register.registerKeyBindings();
-	
+
+	Log.info("Registering achievements");
 	Register.registerAchievements();
+
+	Log.info("Registering tree dictionary");
+	Register.registerTreeDictionary();
+
+	proxy.readBooks();
 
     }
 
     @EventHandler
     public void mainInit(FMLInitializationEvent event) {
 
-	Register.registerRenderers();
+	Log.info("Registering renderers");
+	proxy.registerRenderers();
+
+	Log.info("Registering key bindings");
+	proxy.registerKeyBindings();
 
 	meta.modId = Reference.MOD_ID;
 	meta.name = Reference.MOD_ID;
@@ -109,6 +129,8 @@ public class Myrmecology {
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
+
+	TreeDictionary.updateTreesFromOreDict();
 
     }
 
