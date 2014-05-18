@@ -12,7 +12,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Achievement;
 import net.minecraftforge.common.AchievementPage;
-import net.minecraftforge.common.Configuration;
 import vivadaylight3.myrmecology.api.IEntityAnt;
 import vivadaylight3.myrmecology.api.block.BlockAntHill;
 import vivadaylight3.myrmecology.api.breeding.Breeding;
@@ -24,7 +23,6 @@ import vivadaylight3.myrmecology.common.block.BlockAntChest;
 import vivadaylight3.myrmecology.common.block.BlockAntFarm;
 import vivadaylight3.myrmecology.common.block.BlockFungi;
 import vivadaylight3.myrmecology.common.block.BlockIncubator;
-import vivadaylight3.myrmecology.common.block.BlockInfuser;
 import vivadaylight3.myrmecology.common.block.BlockPheromone;
 import vivadaylight3.myrmecology.common.block.anthill.AntHillDesert;
 import vivadaylight3.myrmecology.common.block.anthill.AntHillForest;
@@ -81,8 +79,6 @@ import vivadaylight3.myrmecology.common.item.chamber.ChamberOdourous;
 import vivadaylight3.myrmecology.common.item.chamber.ChamberPlentiful;
 import vivadaylight3.myrmecology.common.item.chamber.ChamberScavenger;
 import vivadaylight3.myrmecology.common.item.chamber.ChamberSprouter;
-import vivadaylight3.myrmecology.common.lib.InfuserRecipe;
-import vivadaylight3.myrmecology.common.lib.InfuserRecipeRegistry;
 import vivadaylight3.myrmecology.common.lib.Resources;
 import vivadaylight3.myrmecology.common.lib.TreeDictionary;
 import vivadaylight3.myrmecology.common.lib.Url;
@@ -94,8 +90,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
 public class Register {
-
-    public static Configuration config;
 
     public static CreativeTabs tabMyrmecology;
     public static CreativeTabs tabAnts;
@@ -111,6 +105,7 @@ public class Register {
     public static int incubatorLarvaRenderDistance = 10;
 
     EnumAntAIType type;
+    public static int hillSpawnRate;
 
     public static String language;
 
@@ -209,13 +204,6 @@ public class Register {
 
     public static AchievementPage achievementPage;
 
-    // TODO
-    public static void setConfig(Configuration parConfig) {
-
-	config = parConfig;
-
-    }
-
     public static int getNewItemID() {
 
 	latestItemID += 1;
@@ -241,19 +229,19 @@ public class Register {
 
     public static void registerAchievements() {
 
-	achieveReadBook = addAchievement(27, "Myrmecologist",
+	achieveReadBook = addAchievement("myrmecologyAchieveReadBook", "Myrmecologist",
 		"Read an myrmopaedia", 0, 0, null, new ItemStack(itemAntopedia));
-	achieveExtractAnts = addAchievement(28, "Extraction Completion",
+	achieveExtractAnts = addAchievement("myrmecologyAchieveExtract", "Extraction Completion",
 		"Extract some ants from an ant hill!", 2, 0, achieveReadBook,
 		new ItemStack(itemExtractor));
-	achieveIncubateAnts = addAchievement(29, "Nature or Nurture?",
+	achieveIncubateAnts = addAchievement("myrmecologyAchieveIncubate", "Nature or Nurture?",
 		"Start incubating some ants!", 2, 2, achieveExtractAnts,
 		new ItemStack(blockIncubator));
-	achieveBreedAnts = addAchievement(30, "Breeding, just the beginning",
+	achieveBreedAnts = addAchievement("myrmecologyAchieveBreed", "Breeding, just the beginning",
 		"Start breeding some ants!", 0, 2, achieveIncubateAnts,
 		new ItemStack(blockAntFarm));
 	achieveSpawnAnts = addAchievement(
-		31,
+			"myrmecologyAchieveSpawn",
 		"Ant Enslavement",
 		"Spawn an ant "
 			+ Reference.standardTypeNames[Metadata.getMetaWorker()]
@@ -261,15 +249,11 @@ public class Register {
 		achieveBreedAnts,
 		new ItemStack(antForest, 1, Metadata.getMetaWorker()));
 
-	achieveUpgrade = addAchievement(33, "Myrmecological Upgrades",
+	achieveUpgrade = addAchievement("myrmecologyAchieveUpgrade", "Myrmecological Upgrades",
 		"Place and use a formicarium or solarium upgrade", 2, 4,
 		achieveIncubateAnts, new ItemStack(itemUpgrade, 1, 0));
-	
-	achieveInfuser = addAchievement(34, "Pheromonic Infuser",
-		"Place and use a pheromonic infuser", 0, 4, achieveBreedAnts,
-		new ItemStack(blockInfuser));
 
-	achieveAntDimension = addAchievement(32, "Holiday Destination",
+	achieveAntDimension = addAchievement("myrmecologyAchieveDimension", "Holiday Destination",
 		"CLASSIFIED", -2, 0, achieveSpawnAnts, new ItemStack(
 			blockAntChest));
 	achievementPage = new AchievementPage("Myrmecology", achieveReadBook);
@@ -308,65 +292,32 @@ public class Register {
 
     public static void registerBlocks() {
 
-	config.load();
+	blockPheromone = new BlockPheromone();
 
-	blockPheromone = new BlockPheromone(config.get(
-		Configuration.CATEGORY_BLOCK, "pheromone", getNewBlockID())
-		.getInt());
+	blockAntChest = new BlockAntChest();
 
-	blockAntChest = new BlockAntChest(config.get(
-		Configuration.CATEGORY_BLOCK, Reference.BLOCK_ANTCHEST_NAME,
-		getNewBlockID()).getInt());
-
-	blockFungi = new BlockFungi(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.BLOCK_FUNGI_NAME, getNewBlockID()).getInt(),
+	blockFungi = new BlockFungi(
 		Reference.BLOCK_FUNGI_NAME);
 
-	blockAntFarm = new BlockAntFarm(config.get(
-		Configuration.CATEGORY_BLOCK, Reference.BLOCK_ANTFARM_NAME,
-		getNewBlockID()).getInt(), Reference.BLOCK_ANTFARM_NAME);
+	blockAntFarm = new BlockAntFarm( Reference.BLOCK_ANTFARM_NAME);
 
-	blockIncubator = new BlockIncubator(config.get(
-		Configuration.CATEGORY_BLOCK, Reference.BLOCK_INCUBATOR_NAME,
-		getNewBlockID()).getInt(), Reference.BLOCK_INCUBATOR_NAME);
+	blockIncubator = new BlockIncubator(Reference.BLOCK_INCUBATOR_NAME);
 
-	blockInfuser = new BlockInfuser(config.get(
-		Configuration.CATEGORY_BLOCK, Reference.BLOCK_INFUSER_NAME,
-		getNewBlockID()).getInt(), Reference.BLOCK_INFUSER_NAME);
+	hillForest = new AntHillForest();
 
-	hillForest = new AntHillForest(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_FOREST_NAME, getNewBlockID()).getInt());
+	hillDesert = new AntHillDesert();
 
-	hillDesert = new AntHillDesert(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_DESERT_NAME, getNewBlockID()).getInt());
+	hillJungle = new AntHillJungle();
 
-	hillJungle = new AntHillJungle(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_JUNGLE_NAME, getNewBlockID()).getInt());
+	hillPlains = new AntHillPlains();
 
-	hillPlains = new AntHillPlains(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_PLAINS_NAME, getNewBlockID()).getInt(),
-		Material.ground);
+	hillSnow = new AntHillSnow();
 
-	hillSnow = new AntHillSnow(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_SNOW_NAME, getNewBlockID()).getInt(),
-		Material.ground);
+	hillStone = new AntHillStone();
 
-	hillStone = new AntHillStone(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_STONE_NAME, getNewBlockID()).getInt(),
-		Material.ground);
+	hillSwamp = new AntHillSwamp();
 
-	hillSwamp = new AntHillSwamp(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_SWAMP_NAME, getNewBlockID()).getInt(),
-		Material.ground);
-
-	hillWater = new AntHillWater(config.get(Configuration.CATEGORY_BLOCK,
-		Reference.HILL_WATER_NAME, getNewBlockID()).getInt(),
-		Material.ground);
-
-	config.save();
-
-	addBlock(blockInfuser, "Pheromonic Infuser",
-		Reference.BLOCK_INFUSER_NAME);
+	hillWater = new AntHillWater();
 
 	addBlock(blockPheromone, "Pheromone Block", "blockPheromone");
 
@@ -393,13 +344,6 @@ public class Register {
 
     public static boolean checkForUpdates(Url url) {
 
-	config.load();
-
-	checkForUpdates = config.get(Configuration.CATEGORY_GENERAL,
-		"check for updates", false).getBoolean(false);
-
-	config.save();
-
 	if (checkForUpdates) {
 
 	    return url.updateIsAvailable();
@@ -414,162 +358,91 @@ public class Register {
 
     public static void getConfigSettings() {
 
-	config.load();
-
-	incubatorLarvaRenderDistance = config.get(
-		Configuration.CATEGORY_GENERAL, "Render solarium larva within",
-		10).getInt();
-
-	config.save();
-
     }
 
     public static void registerItems() {
 
-	config.load();
+	itemExtractor = new ToolExtractor();
 
-	itemExtractor = new ToolExtractor(config.get(
-		Configuration.CATEGORY_ITEM, Reference.ITEM_EXTRACTOR_NAME,
-		getNewItemID()).getInt());
-
-	itemAntopedia = new ItemMyrmopaedia(config.get(
-		Configuration.CATEGORY_ITEM, Reference.ITEM_MYRMOPAEDIA_NAME,
-		getNewItemID()).getInt());
+	itemAntopedia = new ItemMyrmopaedia();
 
 	// Chambers
-	itemBreedingChamber = new ItemBreedingChamber(config.get(
-		Configuration.CATEGORY_ITEM, Reference.ITEM_CHAMBER_NAME,
-		getNewItemID()).getInt());
+	itemBreedingChamber = new ItemBreedingChamber();
 
-	chamberCommon = new ChamberCommon(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_COMMON_NAME,
-		getNewItemID()).getInt());
+	chamberCommon = new ChamberCommon();
 
-	chamberHarvester = new ChamberHarvester(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_HARVESTER_NAME,
-		getNewItemID()).getInt());
+	chamberHarvester = new ChamberHarvester();
 
-	chamberBarbaric = new ChamberBarbaric(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_BARBARIC_NAME,
-		getNewItemID()).getInt());
+	chamberBarbaric = new ChamberBarbaric();
 
-	chamberPlentiful = new ChamberPlentiful(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_PLENTIFUL_NAME,
-		getNewItemID()).getInt());
+	chamberPlentiful = new ChamberPlentiful();
 
-	chamberCultivator = new ChamberCultivator(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_CULTIVATOR_NAME,
-		getNewItemID()).getInt());
+	chamberCultivator = new ChamberCultivator();
 
-	chamberCarpenter = new ChamberCarpenter(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_CARPENTER_NAME,
-		getNewItemID()).getInt());
+	chamberCarpenter = new ChamberCarpenter();
 
-	chamberMound = new ChamberMound(config.get(Configuration.CATEGORY_ITEM,
-		Reference.CHAMBER_MOUND_NAME, getNewItemID()).getInt());
+	chamberMound = new ChamberMound();
 
-	chamberOdourous = new ChamberOdourous(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_ODOUROUS_NAME,
-		getNewItemID()).getInt());
+	chamberOdourous = new ChamberOdourous();
 
-	chamberHostile = new ChamberHostile(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_HOSTILE_NAME,
-		getNewItemID()).getInt());
+	chamberHostile = new ChamberHostile();
 
-	chamberDredger = new ChamberDredger(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_DREDGER_NAME,
-		getNewItemID()).getInt());
+	chamberDredger = new ChamberDredger();
 
-	chamberScavenger = new ChamberScavenger(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_SCAVENGER_NAME,
-		getNewItemID()).getInt());
+	chamberScavenger = new ChamberScavenger();
 
-	chamberSprouter = new ChamberSprouter(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_SPROUTER_NAME,
-		getNewItemID()).getInt());
+	chamberSprouter = new ChamberSprouter();
 
-	chamberFungal = new ChamberFungal(config.get(
-		Configuration.CATEGORY_ITEM, Reference.CHAMBER_FUNGAL_NAME,
-		getNewItemID()).getInt());
+	chamberFungal = new ChamberFungal();
 
 	// Ants
-	antForest = new AntForest(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_FOREST_NAME, getNewItemID()).getInt());
+	antForest = new AntForest();
 
-	antDesert = new AntDesert(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_DESERT_NAME, getNewItemID()).getInt());
+	antDesert = new AntDesert();
 
-	antWater = new AntWater(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_WATER_NAME, getNewItemID()).getInt());
+	antWater = new AntWater();
 
-	antSwamp = new AntSwamp(config.get(Configuration.CATEGORY_ITEM,
-		"antSwamp", getNewItemID()).getInt());
+	antSwamp = new AntSwamp();
 
-	antJungle = new AntJungle(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_JUNGLE_NAME, getNewItemID()).getInt());
+	antJungle = new AntJungle();
 
-	antPlains = new AntPlains(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_PLAINS_NAME, getNewItemID()).getInt());
+	antPlains = new AntPlains();
 
-	antSnow = new AntSnow(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_SNOW_NAME, getNewItemID()).getInt());
+	antSnow = new AntSnow();
 
-	antStone = new AntStone(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_STONE_NAME, getNewItemID()).getInt());
+	antStone = new AntStone();
 
-	antCommon = new AntCommon(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_COMMON_NAME, getNewItemID()).getInt());
+	antCommon = new AntCommon();
 
-	antHarvester = new AntHarvester(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_HARVESTER_NAME, getNewItemID()).getInt());
+	antHarvester = new AntHarvester();
 
-	antBarbaric = new AntBarbaric(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_BARBARIC_NAME, getNewItemID()).getInt());
+	antBarbaric = new AntBarbaric();
 
-	antPlentiful = new AntPlentiful(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_PLENTIFUL_NAME, getNewItemID()).getInt());
+	antPlentiful = new AntPlentiful();
 
-	antCultivator = new AntCultivator(config.get(
-		Configuration.CATEGORY_ITEM, Reference.ANT_CULTIVATOR_NAME,
-		getNewItemID()).getInt());
+	antCultivator = new AntCultivator();
 
-	antCarpenter = new AntCarpenter(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_CARPENTER_NAME, getNewItemID()).getInt());
+	antCarpenter = new AntCarpenter();
 
-	antMound = new AntMound(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_MOUND_NAME, getNewItemID()).getInt());
+	antMound = new AntMound();
 
-	antOdourous = new AntOdourous(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_ODOUROUS_NAME, getNewItemID()).getInt());
+	antOdourous = new AntOdourous();
 
-	antHostile = new AntHostile(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_HOSTILE_NAME, getNewItemID()).getInt());
+	antHostile = new AntHostile();
 
-	antDredger = new AntDredger(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_DREDGER_NAME, getNewItemID()).getInt());
+	antDredger = new AntDredger();
 
-	antScavenger = new AntScavenger(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_SCAVENGER_NAME, getNewItemID()).getInt());
+	antScavenger = new AntScavenger();
 
-	antSprouter = new AntSprouter(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_SPROUTER_NAME, getNewItemID()).getInt());
+	antSprouter = new AntSprouter();
 
-	antFungal = new AntFungal(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ANT_FUNGAL_NAME, getNewItemID()).getInt());
+	antFungal = new AntFungal();
 
-	itemPheromoneBottle = new ItemPheromone(config.get(
-		Configuration.CATEGORY_ITEM, Reference.ITEM_PHEROMONE_NAME,
-		getNewItemID()).getInt(), Reference.ITEM_PHEROMONE_NAME);
+	itemPheromoneBottle = new ItemPheromone(Reference.ITEM_PHEROMONE_NAME);
 
-	itemUpgrade = new ItemUpgrade(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ITEM_UPGRADE_NAME, getNewItemID()).getInt(),
-		Reference.ITEM_UPGRADE_NAME);
+	itemUpgrade = new ItemUpgrade(Reference.ITEM_UPGRADE_NAME);
 
-	itemAntBag = new ItemAntBag(config.get(Configuration.CATEGORY_ITEM,
-		Reference.ITEM_ANTBAG_NAME, getNewItemID()).getInt(),
-		Reference.ITEM_ANTBAG_NAME);
-
-	config.save();
+	itemAntBag = new ItemAntBag(Reference.ITEM_ANTBAG_NAME);
 
 	// TODO
 	addItem(itemAntBag, "Ant Canister", Reference.ITEM_ANTBAG_NAME);
@@ -737,6 +610,12 @@ public class Register {
 		return new ItemStack(itemAntopedia, 1, 0);
 	    }
 
+		@Override
+		public Item getTabIconItem() {
+			// TODO Auto-generated method stub
+			return itemAntopedia;
+		}
+
 	};
 
 	LanguageRegistry.instance().addStringLocalization(
@@ -748,6 +627,12 @@ public class Register {
 	    public ItemStack getIconItemStack() {
 		return new ItemStack(antForest, 1, 0);
 	    }
+
+		@Override
+		public Item getTabIconItem() {
+			// TODO Auto-generated method stub
+			return antForest;
+		}
 
 	};
 
@@ -785,42 +670,37 @@ public class Register {
 
     public static void registerRecipes() {
 
-	InfuserRecipeRegistry
-		.addRecipe(new InfuserRecipe(new ItemStack(blockInfuser), true,
-			new ItemStack[] { new ItemStack(itemPheromoneBottle),
-				new ItemStack(Block.dirt) }));
-
 	GameRegistry.addRecipe(new ItemStack(blockIncubator, 1), "wgw", "g g",
-		"wrw", 'w', new ItemStack(Block.woodSingleSlab), 'g',
-		new ItemStack(Block.glass), 'r', new ItemStack(
-			Block.redstoneLampIdle));
+		"wrw", 'w', new ItemStack((Block)Block.blockRegistry.getObject("woodSingleSlab")), 'g',
+		new ItemStack((Block)Block.blockRegistry.getObject("glass")), 'r', new ItemStack(
+				(Block)Block.blockRegistry.getObject("redstoneLampIdle")));
 
 	GameRegistry.addRecipe(new ItemStack(blockAntFarm, 1), "wgw", "gsg",
-		"wgw", 'w', new ItemStack(Block.woodSingleSlab), 'g',
-		new ItemStack(Block.glass), 's', new ItemStack(Block.sand));
+		"wgw", 'w', new ItemStack((Block)Block.blockRegistry.getObject("woodSingleSlab")), 'g',
+		new ItemStack((Block)Block.blockRegistry.getObject("glass")), 's', new ItemStack((Block)Block.blockRegistry.getObject("sand")));
 
 	GameRegistry.addRecipe(new ItemStack(itemBreedingChamber), "sws",
-		"w w", "sws", 's', new ItemStack(Item.stick), 'w',
-		new ItemStack(Block.cloth));
+		"w w", "sws", 's', new ItemStack((Item)Item.itemRegistry.getObject("stick")), 'w',
+		new ItemStack((Block)Block.blockRegistry.getObject("cloth")));
 
 	GameRegistry.addRecipe(new ItemStack(itemAntopedia, 1), "ggg", "rir",
-		"ggg", 'g', new ItemStack(Block.thinGlass), 'i', new ItemStack(
-			Item.dyePowder), 'r', new ItemStack(Item.redstone));
+		"ggg", 'g', new ItemStack((Block)Block.blockRegistry.getObject("thinGlass")), 'i', new ItemStack(
+				(Item)Item.itemRegistry.getObject("dyePowder")), 'r', new ItemStack((Item)Item.itemRegistry.getObject("redstone")));
 
 	GameRegistry.addRecipe(new ItemStack(itemExtractor), " s ", "did",
-		" d ", 's', new ItemStack(Item.shovelIron), 'd', new ItemStack(
-			Item.dyePowder, 1, 2), 'i', new ItemStack(
-			Item.ingotIron));
+		" d ", 's', new ItemStack((Item)Item.itemRegistry.getObject("shovelIron")), 'd', new ItemStack(
+				(Item)Item.itemRegistry.getObject("dyePowder"), 1, 2), 'i', new ItemStack(
+						(Item)Item.itemRegistry.getObject("ingotIron")));
 
 	GameRegistry
 		.addRecipe(new ItemStack(itemUpgrade, 1, 0), "rgr", "gpg",
-			"rgr", 'r', Item.redstone, 'g', Item.ingotGold, 'p',
-			Item.paper);
+			"rgr", 'r', (Item)Item.itemRegistry.getObject("redstone"), 'g', (Item)Item.itemRegistry.getObject("ingotGold"), 'p',
+			(Item)Item.itemRegistry.getObject("paper"));
 	GameRegistry.addRecipe(new ItemStack(itemUpgrade, 1, 1), "sgs", "gpg",
-		"sgs", 's', Item.sugar, 'g', Item.ingotGold, 'p', Item.paper);
+		"sgs", 's', (Item)Item.itemRegistry.getObject("sugar"), 'g', (Item)Item.itemRegistry.getObject("ingotGold"), 'p', (Item)Item.itemRegistry.getObject("paper"));
 
 	GameRegistry.addShapelessRecipe(new ItemStack(blockPheromone),
-		itemPheromoneBottle, Block.dirt);
+		itemPheromoneBottle, (Block)Block.blockRegistry.getObject("dirt"));
 
 	for (int k = 0; k < chamberList.size(); k++) {
 
@@ -857,7 +737,7 @@ public class Register {
 
 	WorldGen worldGen = new WorldGen();
 
-	GameRegistry.registerWorldGenerator(worldGen);
+	GameRegistry.registerWorldGenerator(worldGen, 10);
 
     }
 
@@ -974,13 +854,13 @@ public class Register {
 
     }
 
-    public static Achievement addAchievement(int parID, String parName,
+    public static Achievement addAchievement(String parID, String parName,
 	    String parDesc, int posX, int posY, Achievement parParent,
 	    ItemStack parIcon) {
 
 	Achievement ach = new Achievement(parID, parName, posX, posY, parIcon,
 		parParent);
-	ach.registerAchievement();
+	ach.registerStat();
 	LanguageRegistry.instance().addStringLocalization(
 		"achievement." + parName, "en_US", parName);
 	LanguageRegistry.instance().addStringLocalization(
